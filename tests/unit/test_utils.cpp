@@ -430,6 +430,20 @@ TEST(Utils, escapeForShellQuotesEmptyString)
     EXPECT_THAT(res, ::testing::StrEq("''"));
 }
 
+TEST(Utils, escapeForAppArmorEscapesQuotesAndBackslashes)
+{
+    std::string s{"path/with \"quotes\" and \\backslash\\"};
+    auto res = mp::utils::escape_for_apparmor(s);
+    EXPECT_THAT(res, ::testing::StrEq("path/with \\\"quotes\\\" and \\\\backslash\\\\"));
+}
+
+TEST(Utils, escapeForAppArmorLeavesOtherCharactersUnmodified)
+{
+    std::string s{"path/with spaces and [brackets] and {braces} and ?*!"};
+    auto res = mp::utils::escape_for_apparmor(s);
+    EXPECT_THAT(res, ::testing::StrEq("path/with spaces and [brackets] and {braces} and ?*!"));
+}
+
 TEST(Utils, checkIstartswithComparesCaseInsensitively)
 {
     constexpr std::string_view expected_pfx = "tHe hObBit$";

@@ -21,6 +21,7 @@
 #include <multipass/id_mappings.h>
 #include <multipass/logging/log.h>
 #include <multipass/snap_utils.h>
+#include <multipass/utils.h>
 
 #include <QCoreApplication>
 #include <QCryptographicHash>
@@ -124,8 +125,8 @@ profile %1 flags=(attach_disconnected) {
     /{,var/lib/snapd/}snap/core18/*/{,usr/}lib/@{multiarch}/{,**/}*.so* rm,
 
     # allow full access just to this user-specified source directory on the host
-    %4/ rw,
-    %4/** rwlk,
+    "%4/" rw,
+    "%4/**" rwlk,
 }
     )END");
 
@@ -150,7 +151,7 @@ profile %1 flags=(attach_disconnected) {
     return profile_template.arg(apparmor_profile_name(),
                                 signal_peer,
                                 root_dir,
-                                QString::fromStdString(config.source_path));
+                                QString::fromStdString(mpu::escape_for_apparmor(config.source_path)));
 }
 
 QString mp::SSHFSServerProcessSpec::identifier() const

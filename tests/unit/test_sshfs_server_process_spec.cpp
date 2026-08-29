@@ -103,3 +103,26 @@ TEST_F(TestSSHFSServerProcessSpec, unconfinedApparmorProfileReturnsExpectedData)
     EXPECT_TRUE(apparmor_profile.contains(current_dir.absolutePath() + "/{usr/,}lib/**"));
     EXPECT_TRUE(apparmor_profile.contains("signal (receive) peer=unconfined"));
 }
+
+TEST_F(TestSSHFSServerProcessSpec, apparmorProfileQuotesSourcePath)
+{
+    mp::SSHFSServerProcessSpec spec(config);
+    const auto apparmor_profile = spec.apparmor_profile();
+
+    EXPECT_TRUE(apparmor_profile.contains("\"source_path/\" rw,"));
+    EXPECT_TRUE(apparmor_profile.contains("\"source_path/**\" rwlk,"));
+}
+
+TEST_F(TestSSHFSServerProcessSpec, apparmorProfileQuotesAndEscapesSpecialCharactersInSourcePath)
+{
+    auto special_config = config;
+    special_config.source_path = "/home/user/path with spaces and \"quotes\" and \\backslash\\";
+
+    mp::SSHFSServerProcessSpec spec(special_config);
+    const auto apparmor_profile = spec.apparmor_profile();
+
+    EXPECT_TRUE(apparmor_profile.contains(
+        "\"/home/user/path with spaces and \\\"quotes\\\" and \\\\backslash\\\\/\" rw,"));
+    EXPECT_TRUE(apparmor_profile.contains(
+        "\"/home/user/path with spaces and \\\"quotes\\\" and \\\\backslash\\\\/**\" rwlk,"));
+}

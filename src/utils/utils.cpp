@@ -263,6 +263,21 @@ std::string mp::utils::escape_for_shell(const std::string& in)
     return ret;
 }
 
+// Escape double quotes and backslashes for AppArmor quoted string / path rules.
+std::string mp::utils::escape_for_apparmor(const std::string& in)
+{
+    std::string ret;
+    for (char c : in)
+    {
+        if (c == '\\' || c == '"')
+        {
+            ret.push_back('\\');
+        }
+        ret.push_back(c);
+    }
+    return ret;
+}
+
 std::vector<std::string> mp::utils::split(const std::string& string, const std::string& delimiter)
 {
     std::regex regex(delimiter);
