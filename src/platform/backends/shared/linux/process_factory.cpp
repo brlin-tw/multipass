@@ -38,9 +38,9 @@ public:
         : mp::BasicProcess{spec},
           apparmor{aa},
           aa_exec_str(fmt::format("exec {0}",
-                                  process_spec->apparmor_profile_name().toLatin1().toStdString()))
+                                  process_spec->apparmor_profile_name().toUtf8().toStdString()))
     {
-        apparmor.load_policy(process_spec->apparmor_profile().toLatin1());
+        apparmor.load_policy(process_spec->apparmor_profile().toUtf8());
 
         connect(this, &AppArmoredProcess::state_changed, [this](QProcess::ProcessState state) {
             if (state == QProcess::Starting)
@@ -91,7 +91,7 @@ public:
     {
         try
         {
-            apparmor.remove_policy(process_spec->apparmor_profile().toLatin1());
+            apparmor.remove_policy(process_spec->apparmor_profile().toUtf8());
         }
         catch (const std::exception& e)
         {

@@ -97,6 +97,33 @@ TEST_F(ApparmoredProcessTest, loadsProfileWithApparmor)
     EXPECT_TRUE(input.contains(apparmor_profile_text));
 }
 
+TEST_F(ApparmoredProcessTest, loadsUtf8ProfileWithApparmor)
+{
+    class Utf8ProcessSpec : public mp::ProcessSpec
+    {
+        QString program() const override
+        {
+            return "mock_process";
+        }
+        QStringList arguments() const override
+        {
+            return {"one"};
+        }
+        QString apparmor_profile() const override
+        {
+            return "profile test_profile() { /path/with/中文/** rwlk, }";
+        }
+    };
+
+    auto process = process_factory.create_process(std::make_unique<Utf8ProcessSpec>());
+
+    QFile apparmor_input(apparmor_output_file);
+    ASSERT_TRUE(apparmor_input.open(QIODevice::ReadOnly | QIODevice::Text));
+    auto input = apparmor_input.readAll();
+
+    EXPECT_TRUE(input.contains(QString("profile test_profile() { /path/with/中文/** rwlk, }").toUtf8()));
+}
+
 TEST_F(ApparmoredProcessNoFactoryTest, snapEnablesCacheWithExpectedArgs)
 {
     mpt::TempDir cache_dir;
